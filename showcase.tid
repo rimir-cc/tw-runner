@@ -1,0 +1,24 @@
+caption: Runner Showcase
+created: 20260305110721409
+modified: 20260305110721409
+tags: 
+title: $:/plugins/rimir/runner/showcase
+type: text/vnd.tiddlywiki
+
+! Runner Plugin Showcase
+
+!! Open Calculator
+
+<$button>
+<$api.run action="calc"/>
+Open Calculator
+</$button>
+
+!! Echo a Message
+
+<$let msg="hello world">
+<$button>
+<$api.run action="echo" msg=<<msg>>/>
+Echo: <<msg>>
+</$button>
+</$let>

@@ -1,0 +1,14 @@
+created: 20260305110721408
+modified: 20260305110721408
+title: $:/plugins/rimir/runner/documentation
+type: text/vnd.tiddlywiki
+
+<%if [[$:/plugins/rimir/doc-template]has[plugin-type]] %>
+<$tiddler tiddler="$:/plugins/rimir/runner/doc/overview">
+<$transclude $tiddler="$:/plugins/rimir/runner/doc/overview"/>
+</$tiddler>
+<%else%>
+To display this documentation, the plugin [[$:/plugins/rimir/doc-template]] needs to be installed.
+
+See the [[readme|$:/plugins/rimir/runner/readme]] tab for a basic overview.
+<%endif%>

@@ -1,0 +1,69 @@
+created: 20260305110721406
+modified: 20260305110721406
+rdt.order: 4
+rdt.plugin-key: runner
+rdt.plugin-name: runner
+rdt.plugin-subtitle: Execute whitelisted commands on the host machine
+rdt.section: Examples
+title: $:/plugins/rimir/runner/doc/examples
+type: text/vnd.tiddlywiki
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/page">
+<$fill $name="body">
+
+!! Basic usage — Open Calculator
+
+```
+<$button>
+  Open Calculator
+  <$api.run action="calc"/>
+</$button>
+```
+
+!! Parameterized commands — Echo a message
+
+```
+<$button>
+  Say Hello
+  <$api.run action="echo" msg="Hello from TiddlyWiki"/>
+</$button>
+```
+
+!! Action definition format
+
+The `runner-actions.json` file maps action names to command definitions:
+
+```json
+{
+  "action-name": {
+    "command": "some-command {{param1}} --flag {{param2}}",
+    "description": "Human-readable description",
+    "params": ["param1", "param2"]
+  }
+}
+```
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/callout" type="info">
+<$fill $name="body">
+Only params listed in the action's `params` array are substituted into the command template. Unlisted params in the URL are ignored.
+</$fill>
+</$transclude>
+
+!! Multiple actions in one tiddler
+
+You can place several buttons in a single tiddler to build a command dashboard:
+
+```
+<$button>
+  Open Calculator
+  <$api.run action="calc"/>
+</$button>
+
+<$button>
+  Greet
+  <$api.run action="echo" msg="Hello from TiddlyWiki"/>
+</$button>
+```
+
+</$fill>
+</$transclude>

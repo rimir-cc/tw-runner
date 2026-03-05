@@ -1,0 +1,41 @@
+created: 20260305110721408
+modified: 20260305110721408
+rdt.order: 7
+rdt.plugin-key: runner
+rdt.plugin-name: runner
+rdt.plugin-subtitle: Execute whitelisted commands on the host machine
+rdt.section: TW Internals
+title: $:/plugins/rimir/runner/doc/tw-internals
+type: text/vnd.tiddlywiki
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/page">
+<$fill $name="body">
+
+!! child_process.exec
+
+The route uses Node's `child_process.exec()` to run commands. This spawns a shell (`/bin/sh` or `cmd.exe`) and passes the full command string. Stdout and stderr are combined in the response.
+
+!! tm-http-request message
+
+The `<$api.run>` widget dispatches `tm-http-request` — TiddlyWiki's built-in mechanism for browser-to-server HTTP calls. The widget does not use `XMLHttpRequest` directly; it delegates to TW's action message system which handles the actual XHR.
+
+!! Action widget pattern
+
+`exports["api.run"]` in `widget.js` causes TW to register the custom tag `<$api.run>`. The export key (with the dot) becomes the tag name with a `$` prefix. The widget extends `Widget` and implements `invokeAction()` which fires on button click.
+
+!! Route module-type
+
+`module-type: route` tells TW to register the module as an HTTP route handler. The module exports:
+
+* `method` — HTTP method (`"GET"`)
+* `path` — regex for URL matching (`/^\/api\/run$/`)
+* `handler(request, response, state)` — request handler function
+
+TW's HTTP server matches incoming requests against all registered routes.
+
+!! sendJson helper
+
+A common pattern across plugins: set `Content-Type: application/json`, optionally `Access-Control-Allow-Origin: *`, then `response.end(JSON.stringify(data))`.
+
+</$fill>
+</$transclude>

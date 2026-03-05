@@ -1,0 +1,75 @@
+created: 20260305110721407
+modified: 20260305110721407
+rdt.hub-category: infrastructure
+rdt.hub-category-name: Infrastructure
+rdt.hub-order: 1
+rdt.order: 1
+rdt.plugin-key: runner
+rdt.plugin-name: runner
+rdt.plugin-subtitle: Execute whitelisted commands on the host machine
+rdt.section: Overview
+title: $:/plugins/rimir/runner/doc/overview
+type: text/vnd.tiddlywiki
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/page">
+<$fill $name="body">
+
+!! What it does
+
+Runner lets you execute pre-defined commands on the host machine from within TiddlyWiki. Commands are defined in a JSON whitelist file on the filesystem — only listed actions can be executed.
+
+!! Features
+
+* ''Whitelist-only execution'' — only commands defined in `runner-actions.json` can run
+* ''Parameterized commands'' — `{{placeholder}}` templates substituted from query parameters
+* ''Browser widget'' — `<$api.run action="X" param="Y"/>` action widget for use in buttons
+* ''HTTP API'' — `GET /api/run?action=<name>` endpoint
+* ''Filesystem config'' — whitelist lives outside the wiki store (not editable from browser)
+
+!! Prerequisites
+
+* TiddlyWiki running in Node.js server mode
+* `runner-actions.json` file in the wiki root (next to `tiddlywiki.info`)
+
+!! Quick start
+
+# Create `runner-actions.json` in your wiki root:
+
+```json
+{
+  "calc": {
+    "command": "calc",
+    "description": "Open Calculator"
+  },
+  "echo": {
+    "command": "echo {{msg}}",
+    "description": "Echo a message",
+    "params": ["msg"]
+  }
+}
+```
+
+# Restart the TiddlyWiki server
+
+# Use in wiki markup:
+
+```
+<$button>
+  Open Calculator
+  <$api.run action="calc"/>
+</$button>
+
+<$button>
+  Say Hello
+  <$api.run action="echo" msg="Hello World"/>
+</$button>
+```
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/callout" type="info">
+<$fill $name="body">
+Changes to `runner-actions.json` require a server restart — the file is read from disk at boot time.
+</$fill>
+</$transclude>
+
+</$fill>
+</$transclude>

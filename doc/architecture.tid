@@ -1,0 +1,47 @@
+created: 20260305110721405
+modified: 20260305110721405
+rdt.order: 2
+rdt.plugin-key: runner
+rdt.plugin-name: runner
+rdt.plugin-subtitle: Execute whitelisted commands on the host machine
+rdt.section: Architecture
+title: $:/plugins/rimir/runner/doc/architecture
+type: text/vnd.tiddlywiki
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/page">
+<$fill $name="body">
+
+!! Data flow
+
+# Browser: user clicks a `<$button>` containing `<$api.run action="X" param="Y"/>`
+# The `<$api.run>` action widget builds a URL and dispatches a `tm-http-request` message
+# Request reaches the server: `GET /api/run?action=X&param=Y`
+# `route.js` receives the request and looks up the action name in the whitelist loaded from `runner-actions.json`
+# If the action exists, `{{placeholder}}` tokens in the command template are substituted with the matching query parameters
+# The resolved command is executed via `child_process.exec()`
+# The server responds with a JSON object: `{status, output}`
+
+!! Components
+
+|!Component |!Layer |!Role |
+|`route.js` |Server (Node.js) |HTTP route handler — validates action, substitutes params, executes command |
+|`widget.js` |Browser |`<$api.run>` action widget — builds URL, dispatches `tm-http-request` |
+|`runner-actions.json` |Filesystem |Whitelist of allowed actions with command templates |
+
+!! Design decisions
+
+* ''Whitelist-only'': no arbitrary command execution — only actions defined in `runner-actions.json` can run
+* ''Filesystem config'': the whitelist lives on the filesystem, not in the wiki store, creating a security boundary that prevents browser-side editing
+* ''Parameter whitelisting'': only params explicitly listed in the action's `params` array are substituted into the command template; unlisted query params are ignored
+* ''`{{placeholder}}` template syntax'': simple token replacement for parameterized commands
+* ''Widget export convention'': `exports["api.run"]` causes TiddlyWiki to register the tag `<$api.run>`
+* ''Fire-and-forget pattern'': the widget dispatches the HTTP request without handling the return value
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/callout" type="warning">
+<$fill $name="body">
+No shell metacharacter escaping is performed. This is safe because the server is local-only and commands are owner-defined in the whitelist.
+</$fill>
+</$transclude>
+
+</$fill>
+</$transclude>

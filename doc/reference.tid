@@ -1,0 +1,66 @@
+created: 20260305110721408
+modified: 20260305110721408
+rdt.order: 6
+rdt.plugin-key: runner
+rdt.plugin-name: runner
+rdt.plugin-subtitle: Execute whitelisted commands on the host machine
+rdt.section: Reference
+title: $:/plugins/rimir/runner/doc/reference
+type: text/vnd.tiddlywiki
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/page">
+<$fill $name="body">
+
+!! GET /api/run
+
+|!Parameter |!Required |!Description |
+|`action` |Yes |Action name — must match a key in `runner-actions.json` |
+|//any// |No |Additional params substituted into `{{placeholder}}` tokens |
+
+Response (200):
+
+```json
+{"action": "echo", "status": "ok", "output": "Hello"}
+```
+
+Error responses:
+
+|!HTTP |!Condition |
+|400 |`action` parameter missing |
+|403 |Action not found in whitelist |
+|200 |Command execution error (status `"error"`, `error` field set) |
+
+!! <$api.run> widget
+
+|!Attribute |!Required |!Description |
+|`action` |Yes |Action name passed as `?action=` |
+|//any other// |No |Forwarded as query parameters (non-`$`-prefixed) |
+
+Usage: must be inside a `<$button>` — it's an action widget.
+
+```
+<$button>
+  Label
+  <$api.run action="name" param1="value"/>
+</$button>
+```
+
+!! runner-actions.json schema
+
+```json
+{
+  "action-name": {
+    "command": "string — shell command with optional {{param}} placeholders",
+    "params": ["param1", "param2"],
+    "description": "string — human-readable description"
+  }
+}
+```
+
+|!Field |!Required |!Description |
+|`command` |Yes |Shell command template |
+|`params` |No |Whitelist of allowed placeholder names |
+|`description` |No |Human-readable label |
+
+</$fill>
+</$transclude>

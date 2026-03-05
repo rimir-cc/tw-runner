@@ -1,0 +1,35 @@
+created: 20260305110721407
+modified: 20260305110721407
+rdt.order: 5
+rdt.plugin-key: runner
+rdt.plugin-name: runner
+rdt.plugin-subtitle: Execute whitelisted commands on the host machine
+rdt.section: FAQ
+title: $:/plugins/rimir/runner/doc/faq
+type: text/vnd.tiddlywiki
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/page">
+<$fill $name="body">
+
+!! Q: Is this safe to expose on a network?
+
+No. The runner executes real commands on the host machine. It is designed for local development only. If you expose the TiddlyWiki server to a network, anyone can trigger whitelisted commands via `GET /api/run`.
+
+!! Q: Why is the config a filesystem file, not a wiki tiddler?
+
+Security boundary. Wiki tiddlers can be edited from the browser, which would let anyone with browser access modify the command whitelist. Keeping `runner-actions.json` on the filesystem means only someone with file system access can change which commands are allowed.
+
+!! Q: Can I chain multiple commands?
+
+Yes, using shell syntax in the command template. For example: `"command": "echo start && do-something && echo done"`. The entire string is passed to `child_process.exec()` which runs it in a shell.
+
+!! Q: What if a command hangs?
+
+There is no built-in timeout. A hanging command will keep the HTTP connection open indefinitely. The browser's `tm-http-request` may eventually time out on the client side, but the server process will still be running. Kill it manually if needed.
+
+!! Q: How do I pass complex arguments with spaces?
+
+Use shell quoting in the command template. For example: `"command": "echo \"{{msg}}\""`. The `{{placeholder}}` substitution is a simple string replace before the command reaches the shell.
+
+</$fill>
+</$transclude>

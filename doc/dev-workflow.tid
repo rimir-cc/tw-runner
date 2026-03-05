@@ -1,0 +1,54 @@
+created: 20260305110721406
+modified: 20260305110721406
+rdt.order: 3
+rdt.plugin-key: runner
+rdt.plugin-name: runner
+rdt.plugin-subtitle: Execute whitelisted commands on the host machine
+rdt.section: Dev Workflow
+title: $:/plugins/rimir/runner/doc/dev-workflow
+type: text/vnd.tiddlywiki
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/page">
+<$fill $name="body">
+
+!! Plugin files
+
+|!File |!Role |
+|`plugin.info` |Plugin metadata |
+|`route.js` |Server-side HTTP route (`module-type: route`) |
+|`widget.js` |Browser-side action widget (`module-type: widget`) |
+|`runner-actions.json` |Command whitelist (filesystem, not a plugin file) |
+
+!! Restart rules
+
+|!Change |!Restart needed? |
+|Edit `runner-actions.json` |Yes — read from disk at boot |
+|Edit `route.js` |Yes — JS module |
+|Edit `widget.js` |Yes — JS module |
+|Edit `.tid` files |Yes — plugin shadow tiddlers |
+
+<$transclude $tiddler="$:/plugins/rimir/doc-template/templates/callout" type="tip">
+<$fill $name="body">
+On Windows, use `taskkill //F //PID <pid> //T` to kill the server.
+</$fill>
+</$transclude>
+
+!! Adding a new action
+
+# Edit `runner-actions.json` in the wiki root
+# Add an action entry with `command`, `description`, and an optional `params` array
+# Restart the server
+
+!! Testing
+
+* Via curl: `curl "http://localhost:8080/api/run?action=calc"`
+* Via wiki: add a `<$button>` with `<$api.run action="..."/>` inside
+
+!! Version history
+
+|!Version |!Changes |
+|0.1.0 |Initial whitelist-based execution |
+|0.2.0 |Parameterized commands, browser widget, showcase |
+
+</$fill>
+</$transclude>
