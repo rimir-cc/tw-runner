@@ -29,6 +29,10 @@ Use in any tiddler:
 <$button><$api.run action="myaction"/>Run</$button>
 ```
 
+## Plugin Library
+
+Install from the [rimir plugin library](https://rimir-cc.github.io/tw-plugin-library/) via *Control Panel → Plugins → Get more plugins*.
+
 ## License
 
 MIT -- see [LICENSE.md](LICENSE.md)
