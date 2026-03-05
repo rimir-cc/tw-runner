@@ -1,10 +1,3 @@
-created: 20260305110721409
-modified: 20260305110721409
-title: $:/plugins/rimir/runner/license
-type: text/vnd.tiddlywiki
-
-\rules only
-
 MIT License
 
 Copyright (c) since 2026 rimir-cc (https://github.com/rimir-cc)
