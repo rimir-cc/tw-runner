@@ -1,7 +1,8 @@
 {
     "description": "Test edition for runner",
     "plugins": [
-        "tiddlywiki/jasmine"
+        "tiddlywiki/jasmine",
+        "rimir/runner"
     ],
     "themes": [
         "tiddlywiki/vanilla",
