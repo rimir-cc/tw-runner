@@ -46,9 +46,7 @@ On Windows, use `taskkill //F //PID <pid> //T` to kill the server.
 
 !! Version history
 
-|!Version |!Changes |
-|0.1.0 |Initial whitelist-based execution |
-|0.2.0 |Parameterized commands, browser widget, showcase |
+See the [[changelog|$:/plugins/rimir/runner/changelog]] tab for the full version history.
 
 </$fill>
 </$transclude>
