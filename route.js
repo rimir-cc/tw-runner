@@ -40,7 +40,7 @@ exports.handler = function(request, response, state) {
 		var paramValue = state.queryParameters[paramName] || "";
 		command = command.split("{{" + paramName + "}}").join(paramValue);
 	}
-	child_process.exec(command, function(err, stdout, stderr) {
+	child_process.exec(command, {cwd: $tw.boot.wikiPath}, function(err, stdout, stderr) {
 		if(err) {
 			sendJson(response, 200, {
 				action: action,
