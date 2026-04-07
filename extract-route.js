@@ -25,12 +25,20 @@ var EXTRACTORS = {
 	".xlsx": "python3 scripts/xlsx-to-md.py \"{input}\""
 };
 
-// Load scattered-binaries profiles at boot for URI-to-path resolution
-var scatteredProfiles = [];
+// Try to use file-upload's uri-resolver if available (shared location registry)
+var uriResolver = null;
 try {
-	var profilesText = $tw.wiki.getTiddlerText("$:/config/rimir/scattered-binaries/profiles") || "[]";
-	scatteredProfiles = JSON.parse(profilesText);
-} catch(e) { /* no profiles */ }
+	uriResolver = require("$:/plugins/rimir/file-upload/uri-resolver");
+} catch(e) { /* file-upload not installed */ }
+
+// Fallback: load scattered-binaries profiles directly (only if uri-resolver unavailable)
+var scatteredProfiles = [];
+if(!uriResolver) {
+	try {
+		var profilesText = $tw.wiki.getTiddlerText("$:/config/rimir/scattered-binaries/profiles") || "[]";
+		scatteredProfiles = JSON.parse(profilesText);
+	} catch(e) { /* no profiles */ }
+}
 
 exports.method = "GET";
 exports.path = /^\/api\/extract$/;
@@ -49,8 +57,8 @@ exports.handler = function(request, response, state) {
 		return;
 	}
 
-	// Resolve URI to filesystem path
-	var filePath = resolveUri(uri);
+	// Resolve URI to filesystem path (prefer uri-resolver if available)
+	var filePath = uriResolver ? uriResolver.resolve(uri) : resolveUri(uri);
 	if(!filePath) {
 		sendJson(response, 400, {status: "error", error: "Cannot resolve URI to filesystem path: " + uri});
 		return;
@@ -69,7 +77,10 @@ exports.handler = function(request, response, state) {
 		return;
 	}
 
-	// Run extraction
+	// Check if image extraction is requested (PDF only)
+	var extractImages = ext === ".pdf" && isImageExtractionEnabled();
+
+	// Run text extraction
 	var command = commandTemplate.replace("{input}", absPath);
 	child_process.exec(command, {cwd: $tw.boot.wikiPath, maxBuffer: 10 * 1024 * 1024, timeout: 30000}, function(err, stdout, stderr) {
 		if(err) {
@@ -78,12 +89,27 @@ exports.handler = function(request, response, state) {
 				error: err.message,
 				output: (stdout || "") + (stderr || "")
 			});
-		} else {
-			sendJson(response, 200, {
-				status: "ok",
-				output: (stdout || "") + (stderr || "")
-			});
+			return;
 		}
+
+		var result = {
+			status: "ok",
+			output: (stdout || "") + (stderr || "")
+		};
+
+		if(!extractImages) {
+			sendJson(response, 200, result);
+			return;
+		}
+
+		// Run image extraction: pdfimages extracts embedded images from PDF
+		extractPdfImages(absPath, uri, function(imageResult) {
+			if(imageResult && imageResult.images.length > 0) {
+				result.images = imageResult.images;
+				result.derivedDir = imageResult.derivedDir;
+			}
+			sendJson(response, 200, result);
+		});
 	});
 };
 
@@ -122,6 +148,76 @@ function resolveUri(uri) {
 	// Fallback: treat as relative to wiki path (strip leading slash)
 	if(decoded.charAt(0) === "/") decoded = decoded.substring(1);
 	return path.resolve($tw.boot.wikiPath, decoded);
+}
+
+function isImageExtractionEnabled() {
+	var tiddler = $tw.wiki.getTiddler("$:/config/rimir/llm-connect/extract-images");
+	return tiddler && (tiddler.fields.text || "").trim() === "yes";
+}
+
+/*
+Extract images from a PDF using pdfimages (poppler-utils).
+Stores images in files/_derived/<sanitized-filename>/
+Returns: { images: [{filename, uri}], derivedDir: string } via callback
+*/
+function extractPdfImages(pdfPath, pdfUri, callback) {
+	var filesBase = path.resolve($tw.boot.wikiPath, "files");
+	var pdfBasename = path.basename(pdfPath);
+	var derivedDir = path.join(filesBase, "_derived", pdfBasename);
+
+	// Create derived directory
+	try {
+		if(!fs.existsSync(derivedDir)) {
+			fs.mkdirSync(derivedDir, {recursive: true});
+		}
+	} catch(e) {
+		callback(null);
+		return;
+	}
+
+	// pdfimages -png extracts all images as PNG files
+	// Output prefix: derivedDir/img
+	var outputPrefix = path.join(derivedDir, "img");
+	var command = 'pdfimages -png "' + pdfPath + '" "' + outputPrefix + '"';
+
+	child_process.exec(command, {cwd: $tw.boot.wikiPath, timeout: 60000}, function(err) {
+		if(err) {
+			// pdfimages not available or failed — not fatal
+			callback(null);
+			return;
+		}
+
+		// List extracted images
+		var images = [];
+		try {
+			var files = fs.readdirSync(derivedDir);
+			for(var i = 0; i < files.length; i++) {
+				var ext = path.extname(files[i]).toLowerCase();
+				if(ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
+					var relPath = "_derived/" + pdfBasename + "/" + files[i];
+					images.push({
+						filename: files[i],
+						uri: "/files/" + relPath.replace(/\\/g, "/")
+					});
+				}
+			}
+		} catch(e) {
+			callback(null);
+			return;
+		}
+
+		// Clean up if no images extracted
+		if(images.length === 0) {
+			try { fs.rmdirSync(derivedDir); } catch(e) { /* ignore */ }
+			callback(null);
+			return;
+		}
+
+		callback({
+			images: images,
+			derivedDir: "/files/_derived/" + pdfBasename
+		});
+	});
 }
 
 function sendJson(response, statusCode, data) {
