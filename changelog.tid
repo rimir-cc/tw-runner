@@ -6,6 +6,7 @@ type: text/vnd.tiddlywiki
 ! Changelog
 
 |!Version |!Date |!Changes |
+|v0.1.6 |2026-04-27 |Declare hard dependent `theme` and soft-dependents `doc-template`, `file-upload` in plugin.info |
 |v0.1.5 |2026-04-07 |Extract-route uses file-upload's uri-resolver if available (shared location registry), falls back to inline resolution. Optional PDF image extraction via `pdfimages` (poppler-utils) — returns image URIs alongside text when `extract-images` config is enabled |
 |v0.1.4 |2026-04-01 |Document extraction route (`/api/extract?uri=`) — resolves `_canonical_uri` to filesystem path (supports `files/` and scattered-binaries profiles), runs pdftotext/pandoc/python, returns markdown text. 30s timeout, 10MB buffer. XLSX helper script (`scripts/xlsx-to-md.py`). `child_process.exec` now uses `cwd: $tw.boot.wikiPath` for correct working directory |
 |v0.1.3 |2026-03-27 |Fix dev-workflow doc: remove incorrect version history, link to changelog tab |
