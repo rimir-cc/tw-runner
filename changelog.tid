@@ -6,6 +6,7 @@ type: text/vnd.tiddlywiki
 ! Changelog
 
 |!Version |!Date |!Changes |
+|v0.1.7 |2026-05-17 |Test coverage push: 5 new HTTP-level specs for `/api/run` (missing action → 400, unknown action → 403, wrong path → 404, response Content-Type + CORS) and `/api/extract` (missing uri → 400). Uses the new `$:/test-helpers/http-server` harness in tw-tests umbrella — per-plugin `npm test` skips with a pending message. `route.js` was previously 0% covered (handler never fired under Jasmine); now 63% lines / 67% functions. The remaining handler path (action found → child_process.exec) requires a non-empty `runner-actions.json` and isn't safely portable. |
 |v0.1.6 |2026-04-27 |Declare hard dependent `theme` and soft-dependents `doc-template`, `file-upload` in plugin.info |
 |v0.1.5 |2026-04-07 |Extract-route uses file-upload's uri-resolver if available (shared location registry), falls back to inline resolution. Optional PDF image extraction via `pdfimages` (poppler-utils) — returns image URIs alongside text when `extract-images` config is enabled |
 |v0.1.4 |2026-04-01 |Document extraction route (`/api/extract?uri=`) — resolves `_canonical_uri` to filesystem path (supports `files/` and scattered-binaries profiles), runs pdftotext/pandoc/python, returns markdown text. 30s timeout, 10MB buffer. XLSX helper script (`scripts/xlsx-to-md.py`). `child_process.exec` now uses `cwd: $tw.boot.wikiPath` for correct working directory |
